@@ -137,7 +137,17 @@ module Myob
         def build_filter(value)
           return value unless value.is_a?(Hash)
 
-          value.map { |key, value| "#{key} eq '#{value.to_s.gsub("'", "''")}'" }.join(' and ')
+          value.map do |key, nested_value|
+            if nested_value.is_a?(Array)
+              "(#{key} eq '#{nested_value.map { |i| sanitize_value(i) }.join("' or #{key} eq '")}')"
+            else
+              "#{key} eq '#{sanitize_value(nested_value)}'"
+            end
+          end.join(' and ')
+        end
+
+        def sanitize_value(value)
+          value.to_s.gsub("'", "''")
         end
 
         def parse_response(response)
