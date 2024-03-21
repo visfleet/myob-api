@@ -24,7 +24,7 @@ If you've already got an OAuth access token, feel free to skip to API Client Set
 
 The MYOB API uses 3 legged OAuth2. If you don't want to roll your own, or use the [OmniAuth strategy](https://github.com/davidlumley/omniauth-myob) you can authenticate using the `get_access_code_url` and `get_access_token` methods that [ghiculescu](https://github.com/ghiculescu) has provided like so:
 
-    class MYOBSessionController  
+    class MYOBSessionController
       def new
         redirect_to myob_client.get_access_code_url
       end
@@ -142,9 +142,10 @@ You can also get an array of all items (which may make several API calls in the 
 #### Filtering
 
 You can use oData filters:
-
+```ruby
     api_client.employee.all(filter: "IsActive eq true")
-
+    api_client.inventory_item.records(filter: {'Name' => ["Item1", "Item2"]})
+```
 See http://www.odata.org/documentation/odata-version-2-0/uri-conventions/ and http://developer.myob.com/api/accountright/api-overview/retrieving-data/ for information on oData filtering.
 
 #### Fetching one entity
