@@ -15,6 +15,7 @@ module Myob
         @consumer             = options[:consumer]
         @access_token         = options[:access_token]
         @refresh_token        = options[:refresh_token]
+        @scope                = options[:scope] || 'CompanyFile'
 
         @client               = OAuth2::Client.new(@consumer[:key], @consumer[:secret], {
           :site          => 'https://secure.myob.com',
@@ -29,7 +30,11 @@ module Myob
       end
 
       def get_access_code_url(params = {})
-        @client.auth_code.authorize_url(params.merge(scope: 'CompanyFile', redirect_uri: @redirect_uri))
+        params = params.dup
+        scope = params.delete(:scope) || @scope
+        url_params = { scope: scope, redirect_uri: @redirect_uri }
+        url_params[:prompt] = 'consent' if params.delete(:force_consent)
+        @client.auth_code.authorize_url(params.merge(url_params))
       end
 
       def get_access_token(access_code)
@@ -93,6 +98,12 @@ module Myob
         else
           @current_company_file = {}
         end
+      end
+
+      # Set the company file directly using a business_id (GUID) from the OAuth redirect.
+      def set_company_file_from_business_id(business_id)
+        @current_company_file = { :id => business_id, :token => nil }
+        @current_company_file_url = "#{Myob::Api::Model::Base::API_URL}#{business_id}"
       end
 
       def connection
